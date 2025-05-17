@@ -38,23 +38,25 @@ def produtosCreate():
     produtosDados = tk.LabelFrame(produtosRoot, text="Dados do Produto")
     produtosDados.pack(padx=10, pady=10, fill="x")
 
+    # Nome
     nomeLabel = tk.Label(produtosDados, text="Nome")
     nomeLabel.pack(anchor="w", padx=5, pady=(10, 0))
-    nomeEntry = tk.Entry(produtosDados, width=40)
-    nomeEntry.pack(anchor="w", padx=5, pady=2)
+    nomeEntry = tk.Entry(produtosDados)
+    nomeEntry.pack(anchor="w", padx=5, pady=2, fill="x", expand=True)
 
-    preco_id_frame = tk.Frame(produtosDados)
-    preco_id_frame.pack(anchor="w", padx=5, pady=(10, 0), fill="x")
+    # ID and Preço (ID first, Preço fills remaining)
+    id_preco_frame = tk.Frame(produtosDados)
+    id_preco_frame.pack(anchor="w", padx=5, pady=(10, 0), fill="x")
 
-    precoLabel = tk.Label(preco_id_frame, text="Preço")
-    precoLabel.pack(side=tk.LEFT)
-    precoEntry = tk.Entry(preco_id_frame, width=15)
-    precoEntry.pack(side=tk.LEFT, padx=(5, 20))
-
-    idLabel = tk.Label(preco_id_frame, text="ID")
+    idLabel = tk.Label(id_preco_frame, text="ID")
     idLabel.pack(side=tk.LEFT)
-    idEntry = tk.Entry(preco_id_frame, width=8)
-    idEntry.pack(side=tk.LEFT, padx=5)
+    idEntry = tk.Entry(id_preco_frame, width=8)
+    idEntry.pack(side=tk.LEFT, padx=(5, 20))
+
+    precoLabel = tk.Label(id_preco_frame, text="Preço")
+    precoLabel.pack(side=tk.LEFT)
+    precoEntry = tk.Entry(id_preco_frame)
+    precoEntry.pack(side=tk.LEFT, padx=5, fill="x", expand=True)
 
     removerBtn = tk.Button(produtosDados, text="Remover", width=10)
     removerBtn.pack(side=tk.RIGHT, padx=5, pady=10)
