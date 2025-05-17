@@ -1,6 +1,16 @@
 import tkinter as tk
+import time
 from tkinter import ttk
 
+Produtos = [
+    ["ID"],
+    ["Nome"],
+    ["Preço"]
+]
+
+
+
+# Interface para o sistema de cantina
 def menuCreate():
     menuRoot = tk.Tk()
     menuRoot.geometry("400x300")
@@ -25,6 +35,8 @@ def menuCreate():
     menuRoot.mainloop()
 
 def produtosCreate():
+    global id
+    id = 1
     produtosRoot = tk.Tk()
     produtosRoot.title("Produtos")
     produtosRoot.geometry("600x400")
@@ -41,8 +53,10 @@ def produtosCreate():
     # Nome
     nomeLabel = tk.Label(produtosDados, text="Nome")
     nomeLabel.pack(anchor="w", padx=5, pady=(10, 0))
+
     nomeEntry = tk.Entry(produtosDados)
     nomeEntry.pack(anchor="w", padx=5, pady=2, fill="x", expand=True)
+    texto = nomeEntry.get()
 
     # ID and Preço (ID first, Preço fills remaining)
     id_preco_frame = tk.Frame(produtosDados)
@@ -52,17 +66,72 @@ def produtosCreate():
     idLabel.pack(side=tk.LEFT)
     idEntry = tk.Entry(id_preco_frame, width=8)
     idEntry.pack(side=tk.LEFT, padx=(5, 20))
+    idEntry.insert(0, str(id))
+    idEntry.config(state="readonly")
 
     precoLabel = tk.Label(id_preco_frame, text="Preço")
     precoLabel.pack(side=tk.LEFT)
     precoEntry = tk.Entry(id_preco_frame)
     precoEntry.pack(side=tk.LEFT, padx=5, fill="x", expand=True)
 
-    removerBtn = tk.Button(produtosDados, text="Remover", width=10)
+    def LimparInterface():
+        nomeEntry.delete(0, tk.END)
+        precoEntry.delete(0, tk.END)
+        idEntry.config(state="normal")
+        idEntry.delete(0, tk.END)
+        idEntry.insert(0, id)
+        idEntry.config(state="readonly")
+
+    def getInformacoesProduto():
+        if(nomeEntry.get() == "" or idEntry.get() == "" or precoEntry.get() == ""):
+            LimparInterface()
+            print("Erro", "Preencha todos os campos")
+        else:
+            global id
+            id = id+1
+            Produtos[0].append(idEntry.get())
+            Produtos[1].append(nomeEntry.get())
+            Produtos[2].append(precoEntry.get())
+            tree.insert("", "end", values=(idEntry.get(), nomeEntry.get(), precoEntry.get()))
+            idEntry.config(state="normal")
+            idEntry.delete(0, tk.END)
+            idEntry.insert(0, str(id))
+            idEntry.config(state="readonly")
+        
+
+    def AlterarProduto():
+        if(controleID != 1.1):
+            if(nomeEntry.get() == "" or idEntry.get() == "" or precoEntry.get() == ""):
+                print("Erro", "Preencha todos os campos")
+            else:
+                for i in range(len(Produtos[0])):
+                    if(Produtos[0][i] == controleID):
+                        Produtos[0][i] = idEntry.get()
+                        Produtos[1][i] = nomeEntry.get()
+                        Produtos[2][i] = precoEntry.get()
+                        tree.item(tree.selection(), values=(idEntry.get(), nomeEntry.get(), precoEntry.get()))
+                        break
+        LimparInterface()
+
+
+    def RemoverProduto():
+        if(controleID != 1.1):
+            for i in range(len(Produtos[0])):
+                if(Produtos[0][i] == controleID):
+                    Produtos[0].remove(Produtos[0][i])
+                    Produtos[1].remove(Produtos[1][i])
+                    Produtos[2].remove(Produtos[2][i])
+                    tree.delete(tree.selection())
+                    break
+        LimparInterface()
+
+
+    # Buttons
+    removerBtn = tk.Button(produtosDados, text="Remover", width=10,command=RemoverProduto)
     removerBtn.pack(side=tk.RIGHT, padx=5, pady=10)
-    adicionarBtn = tk.Button(produtosDados, text="Adicionar", width=10)
+    adicionarBtn = tk.Button(produtosDados, text="Adicionar", width=10, command=getInformacoesProduto)
     adicionarBtn.pack(side=tk.RIGHT, padx=5, pady=10)
-    alterarBtn = tk.Button(produtosDados, text="Alterar", width=10)
+    alterarBtn = tk.Button(produtosDados, text="Alterar", width=10, command=AlterarProduto)
     alterarBtn.pack(side=tk.RIGHT, padx=5, pady=10)
 
     tree_frame = tk.Frame(produtosRoot)
@@ -78,6 +147,19 @@ def produtosCreate():
     tree.column("preco", width=80)
     tree.pack(fill="both", expand=True)
 
+    def on_tree_select(event):
+        selected_item = tree.focus()
+        valores = tree.item(selected_item, "values")
+        idEntry.config(state="normal")
+        idEntry.delete(0, tk.END)
+        idEntry.insert(0, valores[0])
+        idEntry.config(state="readonly")
+        nomeEntry.delete(0, tk.END)
+        nomeEntry.insert(0, valores[1])
+        precoEntry.delete(0, tk.END)
+        precoEntry.insert(0, valores[2])
+        global controleID
+        controleID = valores[0]
 
 
-
+    tree.bind("<<TreeviewSelect>>", on_tree_select)
