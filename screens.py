@@ -1,14 +1,23 @@
 import tkinter as tk
+import tkinter.messagebox as messagebox
 import time
 from tkinter import ttk
 
 Produtos = [
-    ["ID"],
-    ["Nome"],
-    ["Preço"]
+    [""],
+    [""],
+    [""],
+    [""]
 ]
-
-
+Carrinho = [
+    [""],
+    [""],
+    [""],
+    [""],
+    [""]
+]
+id = 1
+ValorTotal = 0
 
 # Interface para o sistema de cantina
 def menuCreate():
@@ -38,8 +47,10 @@ def menuCreate():
     menuRoot.mainloop()
 
 def produtosCreate():
+   
+
     global id
-    id = 1
+    
     produtosRoot = tk.Tk()
     produtosRoot.title("Produtos")
     produtosRoot.geometry("600x400")
@@ -101,6 +112,7 @@ def produtosCreate():
             Produtos[0].append(idEntry.get())
             Produtos[1].append(nomeEntry.get())
             Produtos[2].append(precoEntry.get())
+            Produtos[3].append(categoriaEntry.get())
             # Adicione categoria ao seu armazenamento se desejar
             tree.insert("", "end", values=(idEntry.get(), nomeEntry.get(), precoEntry.get(), categoriaEntry.get()))
             idEntry.config(state="normal")
@@ -119,6 +131,7 @@ def produtosCreate():
                         Produtos[0][i] = idEntry.get()
                         Produtos[1][i] = nomeEntry.get()
                         Produtos[2][i] = precoEntry.get()
+                        Produtos[3][i] = categoriaEntry.get()
                         # Atualize categoria se desejar
                         tree.item(tree.selection(), values=(idEntry.get(), nomeEntry.get(), precoEntry.get(), categoriaEntry.get()))
                         break
@@ -126,8 +139,14 @@ def produtosCreate():
 
     def RemoverProduto():
         selected_item = tree.selection()
-        if selected_item:
-            tree.delete(selected_item)
+        if(controleID != 1.1):
+            for i in range(len(Produtos[0])):
+                if(Produtos[0][i] == controleID):
+                    Produtos[0].remove(Produtos[0][i])
+                    Produtos[1].remove(Produtos[1][i])
+                    Produtos[2].remove(Produtos[2][i])
+                    tree.delete(tree.selection())
+                    break
         LimparInterface()
 
     # Buttons
@@ -171,9 +190,12 @@ def produtosCreate():
             global controleID
             controleID = valores[0]
 
-    tree.bind("<<TreeviewSelect>>", on_tree_select)
+    for i in range(len(Produtos[0])):
+        tree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i]))
 
 def vendasCreate():
+    global ValorTotal
+    IDControle = 1.1
     vendasRoot = tk.Tk()
     vendasRoot.title("Vendas")
     # Centraliza horizontalmente e posiciona mais para o topo (y=50)
@@ -197,11 +219,67 @@ def vendasCreate():
     procurarProduto = tk.Entry(topFrame, width=50)
     procurarProduto.pack(side=tk.LEFT, padx=5, pady=10, fill="x", expand=True)
 
-    procurarBtn = tk.Button(topFrame, text="Procurar", width=14, height=2)
+    def RemoverCarrinho():
+        global ValorTotal
+        global IDControle
+        print("Remover")
+        selected_item = carrinhoTree.selection()
+        for i in range(len(Carrinho[0])):
+            print(IDControle)
+            if(Carrinho[0][i] == IDControle):
+                ValorTotal -= float(Carrinho[2][i]) * int(Carrinho[4][i])
+                valorTotalLabel.config(text=str(ValorTotal))
+                print("Remover", Carrinho[0][i])
+                Carrinho[0].remove(Carrinho[0][i])
+                Carrinho[1].remove(Carrinho[1][i])
+                Carrinho[2].remove(Carrinho[2][i])
+                Carrinho[3].remove(Carrinho[3][i])
+                Carrinho[4].remove(Carrinho[4][i])
+                carrinhoTree.delete(carrinhoTree.selection())
+                
+                break
+
+    def BuscarProduto():
+        ControleProduto = procurarProduto.get()
+        if ControleProduto == "":
+            for i in range(len(Produtos[0])):
+                for item in tree.get_children():
+                    tree.delete(item)
+                tree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i]))
+        else:
+            for item in tree.get_children():
+                tree.delete(item)
+            for i in range(len(Produtos[0])):
+                if Produtos[1][i] == ControleProduto:
+                    tree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i]))
+                else:
+                    print("Erro", "Produto não encontrado")
+
+    def AdicinarCarrinho():
+        global ValorTotal
+        selected_item = tree.selection()
+        if selected_item:
+            valores = tree.item(selected_item, "values")
+            if valores:
+                for i in range(len(Produtos[0])):
+                    if Produtos[0][i] == valores[0]:
+                        Carrinho[0].append(Produtos[0][i])
+                        Carrinho[1].append(Produtos[1][i])
+                        Carrinho[2].append(Produtos[2][i])
+                        Carrinho[3].append(Produtos[3][i])
+                        Carrinho[4].append(quantidadeEntry.get())
+                        carrinhoTree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i], quantidadeEntry.get()))
+                        ValorTotal += float(Produtos[2][i]) * int(quantidadeEntry.get())
+                        valorTotalLabel.config(text=str(ValorTotal))
+                        break
+        else:
+            print("Erro", "Selecione um produto para adicionar ao carrinho")
+
+    procurarBtn = tk.Button(topFrame, text="Procurar", width=14, height=2, command=BuscarProduto)
     procurarBtn.pack(side=tk.LEFT, padx=5, pady=10)
-    adicionarBtn = tk.Button(topFrame, text="Adicionar", width=14, height=2)
+    adicionarBtn = tk.Button(topFrame, text="Adicionar", width=14, height=2, command=AdicinarCarrinho)
     adicionarBtn.pack(side=tk.LEFT, padx=5, pady=10)
-    removerBtn = tk.Button(topFrame, text="Remover", width=14, height=2)
+    removerBtn = tk.Button(topFrame, text="Remover", width=14, height=2, command=RemoverCarrinho)
     removerBtn.pack(side=tk.LEFT, padx=5, pady=10)
 
     # Frame principal para Treeview e Carrinho lado a lado
@@ -224,6 +302,25 @@ def vendasCreate():
     tree.column("categoria", width=120)
     tree.pack(fill="both", expand=True)
 
+    Carrinho_ID = 0
+    Carrinho_Nome = 0
+    Carrinho_Preco = 0
+    Carrinho_Categoria = 0
+    def on_tree_select(event):
+        global Carrinho_ID, Carrinho_Nome, Carrinho_Preco, Carrinho_Categoria
+        selected_item = tree.focus()
+        valores = tree.item(selected_item, "values")
+        if valores:
+            for i in range(len(Produtos[0])):
+                if Produtos[0][i] == valores[0]:
+                    Carrinho_ID = Produtos[0][i]
+                    Carrinho_Nome = Produtos[1][i]
+                    Carrinho_Preco = Produtos[2][i]
+                    Carrinho_Categoria = Produtos[3][i]
+    tree.bind("<ButtonRelease-1>", on_tree_select)
+
+    
+
     # Carrinho de compras ao lado direito
     carrinhoFrame = tk.LabelFrame(mainFrame, text="Carrinho de compras")
     carrinhoFrame.pack(side=tk.LEFT, fill="both", expand=True, padx=(30,10))
@@ -243,6 +340,14 @@ def vendasCreate():
     carrinhoTree.column("qtd", width=40)
     carrinhoTree.pack(fill="both", expand=True, pady=(10, 10), padx=10)
 
+    def on_carrinho_select(event):
+        global IDControle
+        selected_item = carrinhoTree.focus()
+        valores = carrinhoTree.item(selected_item, "values")
+        if valores:
+            IDControle = valores[0]
+    carrinhoTree.bind("<ButtonRelease-1>", on_carrinho_select)
+
     # Frame para alinhar Total e Finalizar Compra na parte inferior direita
     bottomCarrinhoFrame = tk.Frame(carrinhoFrame)
     bottomCarrinhoFrame.pack(fill="x", side=tk.BOTTOM, anchor="se", padx=10, pady=10)
@@ -251,10 +356,36 @@ def vendasCreate():
     totalLabel.pack(side=tk.LEFT)
     valorTotalLabel = tk.Label(bottomCarrinhoFrame, text="0,00", font=("Arial", 12))
     valorTotalLabel.pack(side=tk.LEFT, padx=(5, 10))
-    finalizarBtn = tk.Button(bottomCarrinhoFrame, text="Finalizar Compra", width=16, height=2)
+
+    quantidadeLabel = tk.Label(bottomCarrinhoFrame, text="Quantidade:", font=("Arial", 12, "bold"))
+    quantidadeLabel.pack(side=tk.LEFT)
+    quantidadeEntry = tk.Entry(bottomCarrinhoFrame, width=50)
+    quantidadeEntry.pack(side=tk.LEFT, padx=5, pady=10, fill="x", expand=True)
+
+    def FinalizarCompra():
+        global ValorTotal
+        if ValorTotal == 0:
+            print("Erro", "Carrinho vazio")
+        else:
+            print("Compra finalizada com sucesso!")
+            print("Valor total:", ValorTotal)
+            messagebox.showinfo("Compra finalizada!", f"Valor total: {ValorTotal}")
+            # Aqui você pode adicionar lógica para salvar a venda em um banco de dados ou arquivo
+            # Limpar o carrinho após finalizar a compra
+            Carrinho[0].clear()
+            Carrinho[1].clear()
+            Carrinho[2].clear()
+            Carrinho[3].clear()
+            Carrinho[4].clear()
+            for item in carrinhoTree.get_children():
+                carrinhoTree.delete(item)
+            ValorTotal = 0
+            valorTotalLabel.config(text="0,00")
+
+    finalizarBtn = tk.Button(bottomCarrinhoFrame, text="Finalizar Compra", width=16, height=2, command=FinalizarCompra)
     finalizarBtn.pack(side=tk.RIGHT)
 
-
-
-
-
+    for i in range(len(Carrinho[0])):
+        carrinhoTree.insert("", "end", values=(Carrinho[0][i], Carrinho[1][i], Carrinho[2][i], Carrinho[3][i], Carrinho[4][i]))
+    for i in range(len(Produtos[0])):
+        tree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i]))
