@@ -138,6 +138,7 @@ def produtosCreate():
         LimparInterface()
 
     def RemoverProduto():
+        global controleID
         selected_item = tree.selection()
         if(controleID != 1.1):
             for i in range(len(Produtos[0])):
@@ -189,7 +190,7 @@ def produtosCreate():
             categoriaEntry.insert(0, valores[3])
             global controleID
             controleID = valores[0]
-
+    tree.bind("<ButtonRelease-1>", on_tree_select)
     for i in range(len(Produtos[0])):
         tree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i]))
 
@@ -227,7 +228,7 @@ def vendasCreate():
         for i in range(len(Carrinho[0])):
             print(IDControle)
             if(Carrinho[0][i] == IDControle):
-                ValorTotal -= float(Carrinho[2][i]) * int(Carrinho[4][i])
+                ValorTotal -= float(Carrinho[2][i]) * float(Carrinho[4][i])
                 valorTotalLabel.config(text=str(ValorTotal))
                 print("Remover", Carrinho[0][i])
                 Carrinho[0].remove(Carrinho[0][i])
