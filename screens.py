@@ -4,17 +4,18 @@ import time
 from tkinter import ttk
 
 Produtos = [
-    [""],
-    [""],
-    [""],
-    [""]
+    [],  # id
+    [],  # nome
+    [],  # preco
+    [],  # categoria
+    []   # quantidade
 ]
 Carrinho = [
-    [""],
-    [""],
-    [""],
-    [""],
-    [""]
+    [],
+    [],
+    [],
+    [],
+    []
 ]
 id = 1
 ValorTotal = 0
@@ -41,16 +42,11 @@ def menuCreate():
     )
     vendasBtn.grid(row=2, column=0, padx=10, pady=5)
 
-    configBtn = tk.Button(menuRoot, width=20, height=4, text="Configurações", command="")
-    configBtn.grid(row=3, column=0, padx=10, pady=5)
-
     menuRoot.mainloop()
 
 def produtosCreate():
-   
-
     global id
-    
+    id = 1
     produtosRoot = tk.Tk()
     produtosRoot.title("Produtos")
     produtosRoot.geometry("600x400")
@@ -93,17 +89,24 @@ def produtosCreate():
     categoriaEntry = tk.Entry(id_preco_frame, width=15)
     categoriaEntry.pack(side=tk.LEFT, padx=5)
 
+    # Quantidade (abaixo do id_preco_frame)
+    quantidadeLabel = tk.Label(produtosDados, text="Quantidade")
+    quantidadeLabel.pack(anchor="w", padx=5, pady=(10, 0))
+    quantidadeEntry = tk.Entry(produtosDados)
+    quantidadeEntry.pack(anchor="w", padx=5, pady=2, fill="x", expand=True)
+
     def LimparInterface():
         nomeEntry.delete(0, tk.END)
         precoEntry.delete(0, tk.END)
         categoriaEntry.delete(0, tk.END)
+        quantidadeEntry.delete(0, tk.END)
         idEntry.config(state="normal")
         idEntry.delete(0, tk.END)
         idEntry.insert(0, id)
         idEntry.config(state="readonly")
 
     def getInformacoesProduto():
-        if(nomeEntry.get() == "" or idEntry.get() == "" or precoEntry.get() == "" or categoriaEntry.get() == ""):
+        if(nomeEntry.get() == "" or idEntry.get() == "" or precoEntry.get() == "" or categoriaEntry.get() == "" or quantidadeEntry.get() == ""):
             LimparInterface()
             print("Erro", "Preencha todos os campos")
         else:
@@ -113,8 +116,8 @@ def produtosCreate():
             Produtos[1].append(nomeEntry.get())
             Produtos[2].append(precoEntry.get())
             Produtos[3].append(categoriaEntry.get())
-            # Adicione categoria ao seu armazenamento se desejar
-            tree.insert("", "end", values=(idEntry.get(), nomeEntry.get(), precoEntry.get(), categoriaEntry.get()))
+            Produtos[4].append(quantidadeEntry.get())
+            tree.insert("", "end", values=(idEntry.get(), nomeEntry.get(), precoEntry.get(), categoriaEntry.get(), quantidadeEntry.get()))
             idEntry.config(state="normal")
             idEntry.delete(0, tk.END)
             idEntry.insert(0, str(id))
@@ -123,7 +126,7 @@ def produtosCreate():
 
     def AlterarProduto():
         if(controleID != 1.1):
-            if(nomeEntry.get() == "" or idEntry.get() == "" or precoEntry.get() == "" or categoriaEntry.get() == ""):
+            if(nomeEntry.get() == "" or idEntry.get() == "" or precoEntry.get() == "" or categoriaEntry.get() == "" or quantidadeEntry.get() == ""):
                 print("Erro", "Preencha todos os campos")
             else:
                 for i in range(len(Produtos[0])):
@@ -132,8 +135,8 @@ def produtosCreate():
                         Produtos[1][i] = nomeEntry.get()
                         Produtos[2][i] = precoEntry.get()
                         Produtos[3][i] = categoriaEntry.get()
-                        # Atualize categoria se desejar
-                        tree.item(tree.selection(), values=(idEntry.get(), nomeEntry.get(), precoEntry.get(), categoriaEntry.get()))
+                        Produtos[4][i] = quantidadeEntry.get()
+                        tree.item(tree.selection(), values=(idEntry.get(), nomeEntry.get(), precoEntry.get(), categoriaEntry.get(), quantidadeEntry.get()))
                         break
         LimparInterface()
 
@@ -146,6 +149,8 @@ def produtosCreate():
                     Produtos[0].remove(Produtos[0][i])
                     Produtos[1].remove(Produtos[1][i])
                     Produtos[2].remove(Produtos[2][i])
+                    Produtos[3].remove(Produtos[3][i])
+                    Produtos[4].remove(Produtos[4][i])
                     tree.delete(tree.selection())
                     break
         LimparInterface()
@@ -162,16 +167,18 @@ def produtosCreate():
     tree_frame.pack(padx=10, pady=10, fill="both", expand=True)
 
     # Treeview Produtos (tela de produtos)
-    columns = ("id", "nome", "preco", "categoria")
+    columns = ("id", "nome", "preco", "categoria", "quantidade")
     tree = ttk.Treeview(tree_frame, columns=columns, show="headings")
     tree.heading("id", text="ID")
     tree.heading("nome", text="Nome")
     tree.heading("preco", text="Preço")
     tree.heading("categoria", text="Categoria")
+    tree.heading("quantidade", text="Quantidade")
     tree.column("id", width=50)
     tree.column("nome", width=200)
     tree.column("preco", width=80)
     tree.column("categoria", width=120)
+    tree.column("quantidade", width=80)
     tree.pack(fill="both", expand=True)
 
     def on_tree_select(event):
@@ -188,11 +195,14 @@ def produtosCreate():
             precoEntry.insert(0, valores[2])
             categoriaEntry.delete(0, tk.END)
             categoriaEntry.insert(0, valores[3])
+            quantidadeEntry.delete(0, tk.END)
+            quantidadeEntry.insert(0, valores[4])
             global controleID
             controleID = valores[0]
-    tree.bind("<ButtonRelease-1>", on_tree_select)
+
+    tree.bind("<<TreeviewSelect>>", on_tree_select)
     for i in range(len(Produtos[0])):
-        tree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i]))
+        tree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i], Produtos[4][i]))
 
 def vendasCreate():
     global ValorTotal
@@ -223,22 +233,35 @@ def vendasCreate():
     def RemoverCarrinho():
         global ValorTotal
         global IDControle
-        print("Remover")
         selected_item = carrinhoTree.selection()
-        for i in range(len(Carrinho[0])):
-            print(IDControle)
-            if(Carrinho[0][i] == IDControle):
-                ValorTotal -= float(Carrinho[2][i]) * float(Carrinho[4][i])
-                valorTotalLabel.config(text=str(ValorTotal))
-                print("Remover", Carrinho[0][i])
-                Carrinho[0].remove(Carrinho[0][i])
-                Carrinho[1].remove(Carrinho[1][i])
-                Carrinho[2].remove(Carrinho[2][i])
-                Carrinho[3].remove(Carrinho[3][i])
-                Carrinho[4].remove(Carrinho[4][i])
-                carrinhoTree.delete(carrinhoTree.selection())
-                
-                break
+        if selected_item:
+            valores = carrinhoTree.item(selected_item, "values")
+            if valores:
+                produto_id = valores[0]
+                quantidade_removida = int(valores[4])
+                # Aumenta a quantidade do produto original
+                for i in range(len(Produtos[0])):
+                    if Produtos[0][i] == produto_id:
+                        Produtos[4][i] = str(int(Produtos[4][i]) + quantidade_removida)
+                        # Atualiza a treeview de produtos
+                        for item in tree.get_children():
+                            prod_vals = tree.item(item, "values")
+                            if prod_vals and prod_vals[0] == produto_id:
+                                tree.item(item, values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i], Produtos[4][i]))
+                                break
+                        break
+                # Remove do carrinho
+                for i in range(len(Carrinho[0])):
+                    if Carrinho[0][i] == produto_id:
+                        ValorTotal -= float(Carrinho[2][i]) * int(Carrinho[4][i])
+                        valorTotalLabel.config(text=str(ValorTotal))
+                        Carrinho[0].pop(i)
+                        Carrinho[1].pop(i)
+                        Carrinho[2].pop(i)
+                        Carrinho[3].pop(i)
+                        Carrinho[4].pop(i)
+                        break
+                carrinhoTree.delete(selected_item)
 
     def BuscarProduto():
         ControleProduto = procurarProduto.get()
@@ -264,14 +287,23 @@ def vendasCreate():
             if valores:
                 for i in range(len(Produtos[0])):
                     if Produtos[0][i] == valores[0]:
-                        Carrinho[0].append(Produtos[0][i])
-                        Carrinho[1].append(Produtos[1][i])
-                        Carrinho[2].append(Produtos[2][i])
-                        Carrinho[3].append(Produtos[3][i])
-                        Carrinho[4].append(quantidadeEntry.get())
-                        carrinhoTree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i], quantidadeEntry.get()))
-                        ValorTotal += float(Produtos[2][i]) * int(quantidadeEntry.get())
-                        valorTotalLabel.config(text=str(ValorTotal))
+                        # Verifica se ainda há quantidade disponível
+                        quantidade_disponivel = int(Produtos[4][i])
+                        if quantidade_disponivel > 0:
+                            Carrinho[0].append(Produtos[0][i])
+                            Carrinho[1].append(Produtos[1][i])
+                            Carrinho[2].append(Produtos[2][i])
+                            Carrinho[3].append(Produtos[3][i])
+                            Carrinho[4].append("1")  # Sempre começa com 1 no carrinho
+                            carrinhoTree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i], "1"))
+                            ValorTotal += float(Produtos[2][i])
+                            valorTotalLabel.config(text=str(ValorTotal))
+                            # Reduz a quantidade disponível no produto
+                            Produtos[4][i] = str(quantidade_disponivel - 1)
+                            # Atualiza a treeview de produtos
+                            tree.item(selected_item, values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i], Produtos[4][i]))
+                        else:
+                            print("Estoque esgotado para este produto.")
                         break
         else:
             print("Erro", "Selecione um produto para adicionar ao carrinho")
@@ -291,17 +323,33 @@ def vendasCreate():
     produtosFrame = tk.Frame(mainFrame)
     produtosFrame.pack(side=tk.LEFT, fill="both", expand=True)
 
-    columns = ("id", "nome", "preco", "categoria")
+    columns = ("id", "nome", "preco", "categoria", "quantidade")
     tree = ttk.Treeview(produtosFrame, columns=columns, show="headings", height=18)
     tree.heading("id", text="ID")
     tree.heading("nome", text="Nome")
     tree.heading("preco", text="Preço")
     tree.heading("categoria", text="Categoria")
+    tree.heading("quantidade", text="Quantidade")
     tree.column("id", width=50)
     tree.column("nome", width=200)
     tree.column("preco", width=80)
     tree.column("categoria", width=120)
+    tree.column("quantidade", width=80)
     tree.pack(fill="both", expand=True)
+
+    # Preenche apenas uma vez!
+    for i in range(len(Produtos[0])):
+        if Produtos[0][i] != "":
+            tree.insert(
+                "", "end",
+                values=(
+                    Produtos[0][i],  # id
+                    Produtos[1][i],  # nome
+                    Produtos[2][i],  # preco
+                    Produtos[3][i],  # categoria
+                    Produtos[4][i],  # quantidade
+                )
+            )
 
     Carrinho_ID = 0
     Carrinho_Nome = 0
@@ -327,18 +375,18 @@ def vendasCreate():
     carrinhoFrame.pack(side=tk.LEFT, fill="both", expand=True, padx=(30,10))
 
     # Treeview do carrinho (tela de vendas)
-    carrinhoColumns = ("id", "nome", "preco", "categoria", "qtd")
+    carrinhoColumns = ("id", "nome", "preco", "categoria", "quantidade")
     carrinhoTree = ttk.Treeview(carrinhoFrame, columns=carrinhoColumns, show="headings", height=14)
     carrinhoTree.heading("id", text="ID")
     carrinhoTree.heading("nome", text="Nome")
     carrinhoTree.heading("preco", text="Preço")
     carrinhoTree.heading("categoria", text="Categoria")
-    carrinhoTree.heading("qtd", text="Qtd")
+    carrinhoTree.heading("quantidade", text="Quantidade")
     carrinhoTree.column("id", width=50)
     carrinhoTree.column("nome", width=120)
     carrinhoTree.column("preco", width=60)
     carrinhoTree.column("categoria", width=120)
-    carrinhoTree.column("qtd", width=40)
+    carrinhoTree.column("quantidade", width=80)
     carrinhoTree.pack(fill="both", expand=True, pady=(10, 10), padx=10)
 
     def on_carrinho_select(event):
@@ -358,11 +406,6 @@ def vendasCreate():
     valorTotalLabel = tk.Label(bottomCarrinhoFrame, text="0,00", font=("Arial", 12))
     valorTotalLabel.pack(side=tk.LEFT, padx=(5, 10))
 
-    quantidadeLabel = tk.Label(bottomCarrinhoFrame, text="Quantidade:", font=("Arial", 12, "bold"))
-    quantidadeLabel.pack(side=tk.LEFT)
-    quantidadeEntry = tk.Entry(bottomCarrinhoFrame, width=50)
-    quantidadeEntry.pack(side=tk.LEFT, padx=5, pady=10, fill="x", expand=True)
-
     def FinalizarCompra():
         global ValorTotal
         if ValorTotal == 0:
@@ -371,8 +414,7 @@ def vendasCreate():
             print("Compra finalizada com sucesso!")
             print("Valor total:", ValorTotal)
             messagebox.showinfo("Compra finalizada!", f"Valor total: {ValorTotal}")
-            # Aqui você pode adicionar lógica para salvar a venda em um banco de dados ou arquivo
-            # Limpar o carrinho após finalizar a compra
+            
             Carrinho[0].clear()
             Carrinho[1].clear()
             Carrinho[2].clear()
@@ -388,5 +430,3 @@ def vendasCreate():
 
     for i in range(len(Carrinho[0])):
         carrinhoTree.insert("", "end", values=(Carrinho[0][i], Carrinho[1][i], Carrinho[2][i], Carrinho[3][i], Carrinho[4][i]))
-    for i in range(len(Produtos[0])):
-        tree.insert("", "end", values=(Produtos[0][i], Produtos[1][i], Produtos[2][i], Produtos[3][i]))
